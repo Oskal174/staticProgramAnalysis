@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Main query
 # MATCH (n1 {code:"ifstream file ( \"graphFile\" ) ;", isCFGNode:"True"}) MATCH (n2 {code:"file . close ( )", isCFGNode:"True"}) 
-# MATCH path = ( (n1)-[:FLOWS_TO*..]-(n2) ) 
+# MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) 
 # RETURN extract(n IN nodes(path) | [n.location, n.code]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;
 #
 # Additional query
@@ -10,11 +10,6 @@
 
 import os
 import sys
-
-
-INTERPRETER = 'D:\\homework\\staticProgramAnalysis\\tools\\neo4j-community-2.3.12\\bin\\Neo4jShell.bat'
-DATABASE_PATH = 'D:\\homework\\staticProgramAnalysis\\neo4j-db\\GraphAlgorithms-joern'
-CQL_FOLDER = 'D:\\homework\\staticProgramAnalysis\\src\\staticProgramAnalysis\\code_trace\\'
 
 
 def parseFlowLabel(string):
@@ -121,7 +116,7 @@ def parse_statements(code_string_ids):
 
 	keys_index = 0
 	statement_types = {}
-	result_file = open('control-flow-res-2', 'r')
+	result_file = open('code_trace\control-flow-2.cqlres', 'r')
 	for line in result_file:
 		statement_type = ''
 
@@ -139,28 +134,28 @@ def parse_statements(code_string_ids):
 	return statement_types
 
 
-if __name__ == '__main__':
-	if len(sys.argv) != 3:
-		print 'usage: python get_trace.py <code_1> <code_2>'
-		exit()
+def get_trace_main(config):
+	INTERPRETER = config["general"]["interpreter_path"]
+	DATABASE_PATH = config["general"]["database_path"]
+	CQL_FOLDER = config["general"]["cql_path"]
 
-	CODE_1 = sys.argv[1]
-	CODE_2 = sys.argv[2]
+	CODE_1 = config["code_trace"]["code_1"]
+	CODE_2 = config["code_trace"]["code_2"]
 
-	# preprocessing code_1 and code_2
-	CODE_1 = 'ifstream file ( \\"graphFile\\" ) ;'
-	CODE_2 = 'file . close ( )'
+	# TODO: preprocessing code_1 and code_2
 
 	# generate main query
-	main_query_file = open('control-flow-1.cql', 'w')
-	main_query_file.write('MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]-(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;')
+	main_query_file = open('code_trace\control-flow-1.cql', 'w')
+	main_query_file.write('MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;')
 	main_query_file.close()
 
 	# main query
-	os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -file ' + CQL_FOLDER + 'control-flow-1.cql > control-flow-res-1')
+	#query = 'MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;'
+	#os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" > code_trace\control-flow-1.cqlres')
+	os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -file ' + CQL_FOLDER + 'control-flow-1.cql > ' + CQL_FOLDER + 'control-flow-1.cqlres')
 
 	# parse main query results
-	file = open('control-flow-res-1', 'r')
+	file = open('code_trace\control-flow-1.cqlres', 'r')
 	
 	traces = []
 	for line in file:
@@ -182,6 +177,10 @@ if __name__ == '__main__':
 
 	file.close()
 
+	if len(traces) == 0:
+		print "There is no trace between | " + CODE_1 + " | and | " + CODE_2 + " |"
+		exit()
+
 	# separate id from trace[1][i] - get dict code_string_ids[id] = code_string
 	code_string_ids = {}
 	for trace in traces:
@@ -196,20 +195,20 @@ if __name__ == '__main__':
 	#print code_string_ids
 
 	# match type of statements (while, if, for) by id
-	open('control-flow-res-2', 'w').close() # clean file
+	open('code_trace\control-flow-2.cqlres', 'w').close() # clean file
 	for code_string, code_string_id in code_string_ids.items():
 		#print code_string_id, code_string
 		query = 'MATCH (n1)-[r:IS_AST_PARENT]->(n2) WHERE id(n2) = ' + code_string_id + ' RETURN n1.type;'
-		os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> control-flow-res-2')
-		#print INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> control-flow-res-2'
-	# parse results in control-flow-res-2 file
+		os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> code_trace\control-flow-2.cqlres')
+		#print INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> code_trace\control-flow-2.cqlres'
+	# parse results
 	statement_types = parse_statements(code_string_ids)
 	#print statement_types
 
 	#for key, val in code_string_ids.items():
 		#print key + ' <==> ' + statement_types[val]
 
-	# print results
+	# show results
 	print '===================================================================================================='
 	# format print
 	k = 0

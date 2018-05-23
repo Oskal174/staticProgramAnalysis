@@ -1,1 +1,0 @@
-MATCH (n1 {code:"ifstream file ( \"graphFile\" ) ;", isCFGNode:"True"}) MATCH (n2 {code:"file . close ( )", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]-(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;

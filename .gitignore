@@ -1,1 +1,7 @@
 .vscode/*
+*.pyc
+*/*.pyc
+*.cql
+*.cqlres
+*/*.cql
+*/*.cqlres
