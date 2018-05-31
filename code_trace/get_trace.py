@@ -134,13 +134,21 @@ def parse_statements(code_string_ids):
 	return statement_types
 
 
-def get_trace_main(config):
+def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	INTERPRETER = config["general"]["interpreter_path"]
 	DATABASE_PATH = config["general"]["database_path"]
-	CQL_FOLDER = config["general"]["cql_path"]
+	CQL_FOLDER = config["general"]["root_path"] + "\\code_trace\\"
+	information_object_trace = config["code_trace"]["information_object_trace"]
 
-	CODE_1 = config["code_trace"]["code_1"]
-	CODE_2 = config["code_trace"]["code_2"]
+	if (args_code_1 == ''):
+		CODE_1 = config["code_trace"]["code_1"]
+	else:
+		CODE_1 = args_code_1
+
+	if (args_code_2 == ''):		
+		CODE_2 = config["code_trace"]["code_2"]
+	else:
+		CODE_2 = args_code_2
 
 	# TODO: preprocessing code_1 and code_2
 
@@ -207,6 +215,13 @@ def get_trace_main(config):
 
 	#for key, val in code_string_ids.items():
 		#print key + ' <==> ' + statement_types[val]
+
+	# check information objects in paths and filter
+	if information_object_trace == 1:
+		for trace in traces:
+			current_codes = trace[1]
+			for current_code in current_codes:
+				print current_code
 
 	# show results
 	print '===================================================================================================='

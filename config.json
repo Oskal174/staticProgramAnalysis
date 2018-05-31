@@ -1,13 +1,14 @@
 {
     "general" : {
-        "interpreter_path" : "D:\\homework\\staticProgramAnalysis\\tools\\neo4j-community-2.3.12\\bin\\Neo4jShell.bat",
-        "database_path" : "D:\\homework\\staticProgramAnalysis\\neo4j-db\\GraphAlgorithms-joern",
-        "cql_path" : "D:\\homework\\staticProgramAnalysis\\src\\staticProgramAnalysis\\code_trace\\"
+        "root_path"         : "D:\\homework\\staticProgramAnalysis\\src\\staticProgramAnalysis",
+        "interpreter_path"  : "D:\\homework\\staticProgramAnalysis\\tools\\neo4j-community-2.3.12\\bin\\Neo4jShell.bat",
+        "database_path"     : "D:\\homework\\staticProgramAnalysis\\neo4j-db\\GraphAlgorithms-joern"
     },
 
     "code_trace" : {
         "code_1" : "ifstream file ( \\\"graphFile\\\" ) ;",
-        "code_2" : "file . close ( )"
+        "code_2" : "file . close ( )",
+        "information_object_trace" : 1
     },
 
     "find_pattern" : {

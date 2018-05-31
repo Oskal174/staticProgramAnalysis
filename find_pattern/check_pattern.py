@@ -9,7 +9,7 @@ import sys
 def check_pattern_main(config):
 	INTERPRETER = config["general"]["interpreter_path"]
 	DATABASE_PATH = config["general"]["database_path"]
-	CQL_FOLDER = config["general"]["cql_path"]
+	CQL_FOLDER = config["general"]["root_path"] + "\\code_trace\\"
 
 	patterns = config["find_pattern"]["patterns"]
 	
