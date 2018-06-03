@@ -1,8 +1,9 @@
 import sys
 import json
+import time
 from code_trace.get_trace import get_trace_main
 from find_pattern.check_pattern import check_pattern_main
-from information_objects.information_objects import information_objects_main
+from functional_objects.functional_objects import functional_objects_main
 
 
 def print_help():
@@ -10,7 +11,7 @@ def print_help():
     print 'Actions:'
     print 'code_trace (ct) - find trace code execution'
     print 'find_pattern (fp) - find pattern in source code'
-    print 'show_information_objects (sio <arg>) - show all information objects in project or write its to file'
+    print 'show_functional_objects (sfo <arg>) - show all functional objects in project or write its to file'
     print '\t <arg>:'
     print '\t \'\' - print list to console'
     print '\t <file_name> - print list to file'
@@ -26,6 +27,7 @@ if __name__ == '__main__':
         print_help()
         exit()
 
+    start_time = time.clock()
     config = read_config()
 
     if sys.argv[1] == 'help' or sys.argv[1] == 'h':
@@ -34,10 +36,12 @@ if __name__ == '__main__':
         get_trace_main(config)
     elif sys.argv[1] == 'find_pattern' or sys.argv[1] == 'fp':
         check_pattern_main(config)
-    elif sys.argv[1] == 'show_information_objects' or sys.argv[1] == 'sio':
+    elif sys.argv[1] == 'show_functional_objects' or sys.argv[1] == 'sfo':
         file = ''
         if len(sys.argv) == 3:
             file = sys.argv[2]
-        information_objects_main(config, file)
+        functional_objects_main(config, 'get_all', file)
     else:
         print_help()
+    
+    print 'time = ', time.clock() - start_time, 'seconds'

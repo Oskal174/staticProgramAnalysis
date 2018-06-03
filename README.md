@@ -8,7 +8,9 @@
 В секции "code_trace" находятся настройки модуля поиска трассы исполнения кода
 - "code_1" начальная точка трассы
 - "code_2" конечная точка трассы
-- "information_object_trace" флаг означающий поиск путей исполнения информационных объектов (1-искать, 0-простая трасса)
+- "functional_object_trace" флаг означающий поиск путей исполнения функциональных объектов (1-искать, 0-простая трасса)
+- "functional_management_control" флаг означающий контроль функциональных объектов по управлению (1 - да, 0 - нет)
+-  "functional_information_control" флаг означающий контроль функциональных объектов по информации (1 - да, 0 - нет)
 
 В секции "find_pattern" находятся настройки модуля поиска вхождения определенных конструкции в исходном тексте
 - "patterns" массив описывающий конструкции для поиска
@@ -28,7 +30,9 @@ ifstream file ( \\\"graphFile\\\" ) ;
     "code_trace" : {
         "code_1" : "ifstream file ( \\\"graphFile\\\" ) ;",
         "code_2" : "file . close ( )",
-        "information_object_trace" : 1
+        "functional_object_trace"           : 1,
+        "functional_management_control"     : 0,
+        "functional_information_control"    : 0
     },
 
     "find_pattern" : {

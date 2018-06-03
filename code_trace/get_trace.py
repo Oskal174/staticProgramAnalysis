@@ -10,6 +10,7 @@
 
 import os
 import sys
+from functional_objects.functional_objects import functional_objects_main
 
 
 def parseFlowLabel(string):
@@ -134,12 +135,43 @@ def parse_statements(code_string_ids):
 	return statement_types
 
 
+def check_functional_object_trace(traces, functional_objects):
+	print 'Start checking fucntional object traces... '
+	print 'Number of object for check: ', len(functional_objects)
+	print 'Symbols for check: ',
+	for obj in functional_objects:
+		print obj.get_symbol(), ' ',
+	print ''
+
+	filtered_traces = []
+	for trace in traces:
+		break_flag = False
+		current_codes = trace[1]
+		for current_code in current_codes:
+			if break_flag:
+				break
+			
+			for obj in functional_objects:
+				# TODO: problem with matching (symbol = i, match with int etc...)
+				if current_code.find(obj.get_symbol()) != -1:
+					filtered_traces.append(trace)
+					break_flag = True
+					break
+
+	print 'done.'
+	return filtered_traces
+
+
+
 def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	INTERPRETER = config["general"]["interpreter_path"]
 	DATABASE_PATH = config["general"]["database_path"]
 	CQL_FOLDER = config["general"]["root_path"] + "\\code_trace\\"
-	information_object_trace = config["code_trace"]["information_object_trace"]
+	functional_object_trace = config["code_trace"]["functional_object_trace"]
+	functional_management_control = config["code_trace"]["functional_management_control"]
+	functional_information_control = config["code_trace"]["functional_information_control"]
 
+	print 'get_trace_main start'
 	if (args_code_1 == ''):
 		CODE_1 = config["code_trace"]["code_1"]
 	else:
@@ -152,11 +184,15 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 
 	# TODO: preprocessing code_1 and code_2
 
+	print 'CODE_1 = ', CODE_1
+	print 'CODE_2 = ', CODE_2
+
 	# generate main query
 	main_query_file = open('code_trace\control-flow-1.cql', 'w')
 	main_query_file.write('MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;')
 	main_query_file.close()
 
+	print 'Get all path... ',
 	# main query
 	#query = 'MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;'
 	#os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" > code_trace\control-flow-1.cqlres')
@@ -184,6 +220,7 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 			traces.append([string_numbers, codes, flow_labels])
 
 	file.close()
+	print 'done.'
 
 	if len(traces) == 0:
 		print "There is no trace between | " + CODE_1 + " | and | " + CODE_2 + " |"
@@ -202,6 +239,7 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 
 	#print code_string_ids
 
+	print 'Get types of statements... ',
 	# match type of statements (while, if, for) by id
 	open('code_trace\control-flow-2.cqlres', 'w').close() # clean file
 	for code_string, code_string_id in code_string_ids.items():
@@ -213,15 +251,23 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	statement_types = parse_statements(code_string_ids)
 	#print statement_types
 
+	print 'done.'
+
 	#for key, val in code_string_ids.items():
 		#print key + ' <==> ' + statement_types[val]
 
-	# check information objects in paths and filter
-	if information_object_trace == 1:
-		for trace in traces:
-			current_codes = trace[1]
-			for current_code in current_codes:
-				print current_code
+	# check functional objects in paths and filter it
+	if functional_object_trace == 1:
+		functional_objects = functional_objects_main(config, 'get_one', CODE_1)
+		traces = check_functional_object_trace(traces, functional_objects)
+	
+	# check functional_management_control
+	if functional_management_control == 1:
+		pass
+
+	# check functional_information_control
+	if functional_information_control == 1:
+		pass
 
 	# show results
 	print '===================================================================================================='
