@@ -117,7 +117,7 @@ def parse_statements(code_string_ids):
 
 	keys_index = 0
 	statement_types = {}
-	result_file = open('code_trace\control-flow-2.cqlres', 'r')
+	result_file = open(r'code_trace\control-flow-2.cqlres', 'r')
 	for line in result_file:
 		statement_type = ''
 
@@ -147,7 +147,8 @@ def check_functional_object_trace(traces, functional_objects):
 	for trace in traces:
 		break_flag = False
 		current_codes = trace[1]
-		for current_code in current_codes:
+		for i in range(1, len(current_codes)):
+			current_code = current_codes[i]
 			if break_flag:
 				break
 			
@@ -162,22 +163,19 @@ def check_functional_object_trace(traces, functional_objects):
 	return filtered_traces
 
 
-
 def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	INTERPRETER = config["general"]["interpreter_path"]
 	DATABASE_PATH = config["general"]["database_path"]
 	CQL_FOLDER = config["general"]["root_path"] + "\\code_trace\\"
 	functional_object_trace = config["code_trace"]["functional_object_trace"]
-	functional_management_control = config["code_trace"]["functional_management_control"]
-	functional_information_control = config["code_trace"]["functional_information_control"]
 
-	print 'get_trace_main start'
-	if (args_code_1 == ''):
+	print 'Starting getting trace'
+	if args_code_1 == '':
 		CODE_1 = config["code_trace"]["code_1"]
 	else:
 		CODE_1 = args_code_1
 
-	if (args_code_2 == ''):		
+	if args_code_2 == '':		
 		CODE_2 = config["code_trace"]["code_2"]
 	else:
 		CODE_2 = args_code_2
@@ -188,7 +186,7 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	print 'CODE_2 = ', CODE_2
 
 	# generate main query
-	main_query_file = open('code_trace\control-flow-1.cql', 'w')
+	main_query_file = open(r'code_trace\control-flow-1.cql', 'w')
 	main_query_file.write('MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;')
 	main_query_file.close()
 
@@ -197,9 +195,10 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	#query = 'MATCH (n1 {code:"' + CODE_1 + '", isCFGNode:"True"}) MATCH (n2 {code:"' + CODE_2 + '", isCFGNode:"True"}) MATCH path = ( (n1)-[:FLOWS_TO*..]->(n2) ) RETURN extract(n IN nodes(path) | [n.location, n.code, id(n)]) AS codes, extract(n IN relationships(path) | n.flowLabel) AS flowLabels;'
 	#os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" > code_trace\control-flow-1.cqlres')
 	os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -file ' + CQL_FOLDER + 'control-flow-1.cql > ' + CQL_FOLDER + 'control-flow-1.cqlres')
+	#print INTERPRETER + ' -path ' + DATABASE_PATH + ' -file ' + CQL_FOLDER + 'control-flow-1.cql > ' + CQL_FOLDER + 'control-flow-1.cqlres'
 
 	# parse main query results
-	file = open('code_trace\control-flow-1.cqlres', 'r')
+	file = open(r'code_trace\control-flow-1.cqlres', 'r')
 	
 	traces = []
 	for line in file:
@@ -241,7 +240,7 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 
 	print 'Get types of statements... ',
 	# match type of statements (while, if, for) by id
-	open('code_trace\control-flow-2.cqlres', 'w').close() # clean file
+	open(r'code_trace\control-flow-2.cqlres', 'w').close() # clean file
 	for code_string, code_string_id in code_string_ids.items():
 		#print code_string_id, code_string
 		query = 'MATCH (n1)-[r:IS_AST_PARENT]->(n2) WHERE id(n2) = ' + code_string_id + ' RETURN n1.type;'
@@ -260,14 +259,11 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	if functional_object_trace == 1:
 		functional_objects = functional_objects_main(config, 'get_one', CODE_1)
 		traces = check_functional_object_trace(traces, functional_objects)
-	
-	# check functional_management_control
-	if functional_management_control == 1:
-		pass
-
-	# check functional_information_control
-	if functional_information_control == 1:
-		pass
+		if len(traces) == 0:
+			print 'There is no trace with functional object(s):'
+			for obj in functional_objects:
+				print '\t', obj
+			exit()
 
 	# show results
 	print '===================================================================================================='

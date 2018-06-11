@@ -4,6 +4,8 @@ import time
 from code_trace.get_trace import get_trace_main
 from find_pattern.check_pattern import check_pattern_main
 from functional_objects.functional_objects import functional_objects_main
+from functional_information_control.functional_information_control import fic_main
+from functional_management_control.functional_management_control import fmc_main
 
 
 def print_help():
@@ -15,6 +17,8 @@ def print_help():
     print '\t <arg>:'
     print '\t \'\' - print list to console'
     print '\t <file_name> - print list to file'
+    print 'functional_management_control (fmc) - make functional management control'
+    print 'functional_information_control (fic) - make functional information control'
 
 
 def read_config():
@@ -41,6 +45,10 @@ if __name__ == '__main__':
         if len(sys.argv) == 3:
             file = sys.argv[2]
         functional_objects_main(config, 'get_all', file)
+    elif sys.argv[1] == 'functional_management_control' or sys.argv[1] == 'fmc':
+        fmc_main(config)
+    elif sys.argv[1] == 'functional_information_control' or sys.argv[1] == 'fic':
+        fic_main(config)
     else:
         print_help()
     
