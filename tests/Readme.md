@@ -269,11 +269,15 @@
     141:1 file . close ( )
     ==================================================================================================
     time =  100.567015306 seconds
-    Параметры запуска:
-    “code_1” : “unsigned int test = 123 ;”
-    “code_2” : “file . close ( )”
-    “functional_object_trace” : 1
-    Результат тестирования:
+
+Параметры запуска:
+
+    "code_1" : "unsigned int test = 123 ;"
+    "code_2" : "file . close ( )"
+    "functional_object_trace" : 1
+
+Результат тестирования:
+
     get_trace_main start
     CODE_1 =  unsigned int test = 123 ;
     CODE_2 =  file . close ( )
