@@ -5,3 +5,4 @@
 *.cqlres
 */*.cql
 */*.cqlres
+functional_objects.txt
