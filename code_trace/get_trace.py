@@ -28,6 +28,9 @@ def parseCode(string):
 
 
 def parseLineNumber(string):
+	if string == '': # is its EXIT node
+		return 'null'
+
 	parts = string.split(':')
 	return parts[0] + ':' + parts[1]
 
@@ -110,7 +113,9 @@ def separate_id_from_code(code_string):
 
 def parse_statements(code_string_ids):
 	statement_types_keys = []
-	for key in code_string_ids.keys():
+	for key in code_string_ids.keys(): 
+		if key == '<null>,EXIT':
+			continue
 		statement_types_keys.append(code_string_ids[key])
 
 	#print statement_types_keys
@@ -163,7 +168,31 @@ def check_functional_object_trace(traces, functional_objects):
 	return filtered_traces
 
 
-def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
+def print_traces(traces, statement_types, code_string_ids):
+	print '===================================================================================================='
+	# format print
+	k = 0
+	for trace in traces:
+		print 'Trace ' + str(k) + '\n'
+		for i in range(len(trace[0])):
+			if trace[1][i] == '<null>,EXIT':
+				print 'EXIT'
+				continue
+
+			if i == len(trace[0])-1: # last string in trace
+				print trace[0][i] + ' ' + trace[1][i]
+			else:
+				if trace[2][i] == '':
+					print trace[0][i] + ' ' + trace[1][i] + ' -- ' + statement_types[code_string_ids[trace[1][i]]] + trace[2][i] + ' --> '
+				else:
+					print trace[0][i] + ' ' + trace[1][i] + ' -- ' + statement_types[code_string_ids[trace[1][i]]] + ':' + trace[2][i] + ' --> '
+
+		k = k + 1
+		print '===================================================================================================='
+
+
+
+def get_trace_main(config, args_code_1 = '', args_code_2 = '', mode = 'main'):
 	INTERPRETER = config["general"]["interpreter_path"]
 	DATABASE_PATH = config["general"]["database_path"]
 	CQL_FOLDER = config["general"]["root_path"] + "\\code_trace\\"
@@ -223,7 +252,7 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 
 	if len(traces) == 0:
 		print "There is no trace between | " + CODE_1 + " | and | " + CODE_2 + " |"
-		exit()
+		return
 
 	# separate id from trace[1][i] - get dict code_string_ids[id] = code_string
 	code_string_ids = {}
@@ -243,6 +272,9 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 	open(r'code_trace\control-flow-2.cqlres', 'w').close() # clean file
 	for code_string, code_string_id in code_string_ids.items():
 		#print code_string_id, code_string
+		if code_string == '<null>,EXIT':
+			continue
+		
 		query = 'MATCH (n1)-[r:IS_AST_PARENT]->(n2) WHERE id(n2) = ' + code_string_id + ' RETURN n1.type;'
 		os.system(INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> code_trace\control-flow-2.cqlres')
 		#print INTERPRETER + ' -path ' + DATABASE_PATH + ' -c \"' + query + '\" >> code_trace\control-flow-2.cqlres'
@@ -256,29 +288,21 @@ def get_trace_main(config, args_code_1 = '', args_code_2 = ''):
 		#print key + ' <==> ' + statement_types[val]
 
 	# check functional objects in paths and filter it
-	if functional_object_trace == 1:
+	if functional_object_trace == 1 and mode == 'main':
 		functional_objects = functional_objects_main(config, 'get_one', CODE_1)
 		traces = check_functional_object_trace(traces, functional_objects)
 		if len(traces) == 0:
 			print 'There is no trace with functional object(s):'
 			for obj in functional_objects:
 				print '\t', obj
-			exit()
+			return
 
 	# show results
-	print '===================================================================================================='
-	# format print
-	k = 0
-	for trace in traces:
-		print 'Trace ' + str(k) + '\n'
-		for i in range(len(trace[0])):
-			if i == len(trace[0])-1: # last string in trace
-				print trace[0][i] + ' ' + trace[1][i]
-			else:
-				if trace[2][i] == '':
-					print trace[0][i] + ' ' + trace[1][i] + ' -- ' + statement_types[code_string_ids[trace[1][i]]] + trace[2][i] + ' --> '
-				else:
-					print trace[0][i] + ' ' + trace[1][i] + ' -- ' + statement_types[code_string_ids[trace[1][i]]] + ':' + trace[2][i] + ' --> '
-
-		k = k + 1
-		print '===================================================================================================='
+	# trace[0] - string number
+	# trace[1] - code
+	# trace[2] - True, False or ''
+	if mode == 'main':
+		print_traces(traces, statement_types, code_string_ids)
+	elif mode == 'service':
+		# TODO: create class for containing trace
+		return {'statement_types': statement_types, 'traces': traces, 'code_string_ids': code_string_ids}

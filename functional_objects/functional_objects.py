@@ -135,6 +135,7 @@ def get_all_fo(INTERPRETER, DATABASE_PATH, ROOT_DIRECTORY, output_file):
     # show objects
     if output_file == '':
         print 'Result:'
+        print 'Number of objects: ', len(list_objects)
         print '------------------------------------------------------------------'
         for obj in list_objects:
             print obj
@@ -149,6 +150,7 @@ def get_all_fo(INTERPRETER, DATABASE_PATH, ROOT_DIRECTORY, output_file):
 
 def write_io_to_file(list_objects, output_file_name):
     out_file = open(output_file_name, 'w')
+    out_file.write('Number of objects: ' + str(len(list_objects)) + '\n') 
     for obj in list_objects:
         #out_file.write(obj.get_id() + " : " + obj.get_location() + " : " + obj.get_code() + ' -> ' + obj.get_symbol() + '\n')
         out_file.write(obj.get_str())
