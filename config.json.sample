@@ -1,0 +1,32 @@
+{
+    "general" : {
+        "root_path"         : "D:\\homework\\staticProgramAnalysis\\src\\staticProgramAnalysis",
+        "interpreter_path"  : "D:\\homework\\staticProgramAnalysis\\tools\\neo4j-community-2.3.12\\bin\\Neo4jShell.bat",
+        "database_path"     : "D:\\homework\\staticProgramAnalysis\\neo4j-db\\GraphAlgorithms-joern-3",
+        "output"            : "out.txt"
+    },
+
+    "code_trace" : {
+        "functional_object_trace"           : 1,
+        "code_1"                            : "unsigned int test = 123 ;",
+        "code_2"                            : "file . close ( )"
+    },
+
+    "functional_management_control" : {
+        "main_object"       : "unsigned int test = 123 ;",
+        "secondary_object"  : ""
+    },
+
+    "functional_information_control" : {
+        "main_object"       : "unsigned int test = 123 ;",
+        "secondary_object"  : "ifstream file ( \\\"graphFile\\\" ) ;"
+    },
+
+    "find_pattern" : {
+        "patterns" : [
+            "ifstream file ( \\\"graphFile\\\" ) ;",
+            "file . close ( )",
+            "file"
+        ]
+    }
+}
