@@ -1,4 +1,5 @@
 import os
+import re
 from functional_objects import functional_object
 from code_trace.get_trace import get_trace_main
 from code_trace.get_trace import print_traces
@@ -15,12 +16,21 @@ def parse_trace(main_object, secondary_object, trace, param):
 	suitable_trace = [[], [], []]
 	for i in range(len(trace[0])):
 		current_code = trace[1][i]
-		
-		if (current_code.find(main_object.get_symbol_spaces()) != -1) and (current_code.find(secondary_object.get_symbol_spaces()) != -1):
+		words = current_code.split(' ')
+		is_main_present = False
+		is_secondary_present = False
+		for word in words:
+			if main_object.get_symbol() == word:
+				is_main_present = True
+			if secondary_object.get_symbol() == word:
+				is_secondary_present = True
+			
+		if is_main_present == True and is_secondary_present == True:
 			suitable_trace[0].append(trace[0][i])
 			suitable_trace[1].append(trace[1][i])
 			suitable_trace[2].append(trace[2][i])
-	#print 'suitable trace = ', suitable_trace
+
+	print 'suitable trace = ', suitable_trace
 	
 	resutl_trace = [[], [], []]
 	if param == 'fmc':
@@ -36,14 +46,14 @@ def parse_trace(main_object, secondary_object, trace, param):
 						resutl_trace[0].append(suitable_trace[0][i])
 						resutl_trace[1].append(suitable_trace[1][i])
 						resutl_trace[2].append(suitable_trace[2][i])
-				continue
+					continue
 
 			# main obj in the method call -> secondObj.method(mainObj)
 			dot_index = current_code.find('.')
 			open_bkt = current_code.find('(')
 			close_bkt = current_code.find(')')
-			main_obj_sym = current_code.find(main_object.get_symbol_spaces())
-			secondary_obj_sym = current_code.find(secondary_object.get_symbol_spaces())
+			main_obj_sym = current_code.find(main_object.get_symbol())
+			secondary_obj_sym = current_code.find(secondary_object.get_symbol())
 			
 			#print open_bkt
 			#print close_bkt
@@ -58,7 +68,7 @@ def parse_trace(main_object, secondary_object, trace, param):
 					resutl_trace[0].append(suitable_trace[0][i])
 					resutl_trace[1].append(suitable_trace[1][i])
 					resutl_trace[2].append(suitable_trace[2][i])
-				continue
+					continue
 			
 			# main obj in the constructor call -> secondObj so(mainObj)
 			if open_bkt != -1 and close_bkt != -1:
@@ -69,13 +79,30 @@ def parse_trace(main_object, secondary_object, trace, param):
 					resutl_trace[0].append(suitable_trace[0][i])
 					resutl_trace[1].append(suitable_trace[1][i])
 					resutl_trace[2].append(suitable_trace[2][i])
-				continue
+					continue
 
-			# TODO: other operators (<<, >>, +, etc.) 
+			left_redirect = current_code.find('<<')
+			if left_redirect != -1:
+				if main_obj_sym > left_redirect and secondary_obj_sym < left_redirect:
+					resutl_trace[0].append(suitable_trace[0][i])
+					resutl_trace[1].append(suitable_trace[1][i])
+					resutl_trace[2].append(suitable_trace[2][i])
+					continue
+
+			right_redirect = current_code.find('>>')
+			if right_redirect != -1:
+				if main_obj_sym < right_redirect and secondary_obj_sym > right_redirect:
+					resutl_trace[0].append(suitable_trace[0][i])
+					resutl_trace[1].append(suitable_trace[1][i])
+					resutl_trace[2].append(suitable_trace[2][i])
+					continue
+
+			# TODO: other operators (+, -, *, /, etc.) 
 
 	elif param == 'fic':
 		for i in range(len(suitable_trace[0])):
 			current_code = suitable_trace[1][i]
+			print 'current_code = ', current_code
 
 			# main obj at the left side by = -> mainObj = secondaryObj
 			if current_code.find('=') != -1:
@@ -86,19 +113,19 @@ def parse_trace(main_object, secondary_object, trace, param):
 						resutl_trace[0].append(suitable_trace[0][i])
 						resutl_trace[1].append(suitable_trace[1][i])
 						resutl_trace[2].append(suitable_trace[2][i])
-				continue
+						continue
 
 			# secondary obj in the method call -> mainObj.method(secondObj)
 			dot_index = current_code.find('.')
 			open_bkt = current_code.find('(')
 			close_bkt = current_code.find(')')
-			main_obj_sym = current_code.find(main_object.get_symbol_spaces())
-			secondary_obj_sym = current_code.find(secondary_object.get_symbol_spaces())
+			main_obj_sym = current_code.find(main_object.get_symbol())
+			secondary_obj_sym = current_code.find(secondary_object.get_symbol())
 			
-			#print open_bkt
-			#print close_bkt
-			#print main_obj_sym
-			#print secondary_obj_sym
+			print open_bkt
+			print close_bkt
+			print main_obj_sym
+			print secondary_obj_sym
 
 			if dot_index != -1:
 				if open_bkt == -1 or close_bkt == -1 or main_obj_sym == -1 or secondary_obj_sym == -1:
@@ -108,7 +135,7 @@ def parse_trace(main_object, secondary_object, trace, param):
 					resutl_trace[0].append(suitable_trace[0][i])
 					resutl_trace[1].append(suitable_trace[1][i])
 					resutl_trace[2].append(suitable_trace[2][i])
-				continue
+					continue
 			
 			# second obj in the constructor call -> mainObj mo(secondObj)
 			if open_bkt != -1 and close_bkt != -1:
@@ -119,9 +146,28 @@ def parse_trace(main_object, secondary_object, trace, param):
 					resutl_trace[0].append(suitable_trace[0][i])
 					resutl_trace[1].append(suitable_trace[1][i])
 					resutl_trace[2].append(suitable_trace[2][i])
-				continue
+					continue
 
-			# TODO: other operators (<<, >>, +, etc.)
+			left_redirect = current_code.find('<<')
+			if left_redirect != -1:
+				print 'left_redirect = ', left_redirect
+				print 'secondary_obj_sym = ', secondary_obj_sym
+				print 'main_obj_sym = ', main_obj_sym
+				if secondary_obj_sym > left_redirect and main_obj_sym < left_redirect:
+					resutl_trace[0].append(suitable_trace[0][i])
+					resutl_trace[1].append(suitable_trace[1][i])
+					resutl_trace[2].append(suitable_trace[2][i])
+					continue
+
+			right_redirect = current_code.find('>>')
+			if right_redirect != -1:
+				if secondary_obj_sym < right_redirect and main_obj_sym > right_redirect:
+					resutl_trace[0].append(suitable_trace[0][i])
+					resutl_trace[1].append(suitable_trace[1][i])
+					resutl_trace[2].append(suitable_trace[2][i])
+					continue
+
+			# TODO: other operators (+, -, *, /, etc.)
 	else:
 		print 'wrong param'
 

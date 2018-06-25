@@ -435,4 +435,57 @@ void testFunc() {
 
 Результаты тестирования:
 
-Вывод:
+    Start processing of functional information control...
+    Get one functional object...  done.
+    Get symbol of functional object...  done.
+    Get one functional object...  done.
+    Get symbol of functional object...  done.
+    There is  1  main objects in project
+            3131 : 162:1:3411:3434 : ofstream file ( filename ) ; -> file
+    There is  1  secondary objects in project
+            3140 : 159:1:3357:3382 : string strToWrite ( "test" ) ; -> strToWrite
+    Starting getting trace
+    CODE_1 =  ofstream file ( filename ) ;
+    CODE_2 =  EXIT
+    Get all path...  done.
+    Get types of statements...  done.
+    Start parsing traces to functional information control...
+    done.
+    Start parsing traces to functional information control...
+    done.
+    ====================================================================================================
+    Trace 0
+
+    162:1 ofstream file ( filename ) ; -- CompoundStatement -->
+    164:1 int someNumber = 0 ; -- CompoundStatement -->
+    165:6 int i = 0 ; -- ForStatement -->
+    165:17 i ++ -- ForStatement:False -->
+    172:1 file . close ( ) -- CompoundStatement -->
+    174:1 return ; -- CompoundStatement -->
+    EXIT
+    ====================================================================================================
+    Trace 1
+
+    162:1 ofstream file ( filename ) ; -- CompoundStatement -->
+    164:1 int someNumber = 0 ; -- CompoundStatement -->
+    165:6 int i = 0 ; -- ForStatement -->
+    165:17 i ++ -- ForStatement:True -->
+    166:2 someNumber = i + 1 -- CompoundStatement -->
+    167:2 file . write ( strToWrite . c_str ( ) , strToWrite . length ( ) ) -- CompoundStatement -->
+    168:2 file << strToWrite -- CompoundStatement -->
+    169:2 strToWrite += filename -- CompoundStatement -->
+    165:22 i < 100 -- ForStatement -->
+    165:17 i ++ -- ForStatement:False -->
+    172:1 file . close ( ) -- CompoundStatement -->
+    174:1 return ; -- CompoundStatement -->
+    EXIT
+    ====================================================================================================
+    Examples of interaction between objects
+    For trace  0
+            No
+    For trace  1
+            167:2   file . write ( strToWrite . c_str ( ) , strToWrite . length ( ) )
+            168:2   file << strToWrite
+    time =  106.563243658 seconds
+
+Вывод: программа успешно детектировала места в коде, в которых прослеживается связь по информации между исследуемым и второстепенным объектом.
