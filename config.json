@@ -18,8 +18,8 @@
     },
 
     "functional_information_control" : {
-        "main_object"       : "unsigned int test = 123 ;",
-        "secondary_object"  : "ifstream file ( \\\"graphFile\\\" ) ;"
+        "main_object"       : "ofstream file ( filename ) ;",
+        "secondary_object"  : "string strToWrite ( \\\"test\\\" ) ;"
     },
 
     "find_pattern" : {

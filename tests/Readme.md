@@ -1,7 +1,7 @@
 Результаты тестирования
 =====================
 
-Директория содержит результаты тестирования программы, далее идет описание каждого теста.
+Директория содержит результаты тестирования программы. Базы данных, полученные с помощью инструмента статического анализа Joern, находятся в директории neo4j-db
 
 ### Тест №1
 
@@ -12,27 +12,29 @@
 2.	Запустить программу командой python main.py ct
 
 Участок кода:
-    
-    ifstream file("graphFile");
-    
-    unsigned int n = 0;
-    unsigned int oriented;
-    file >> n >> oriented;
 
-    G.resize(n);
+```cpp  
+ifstream file("graphFile");
 
-    while (!file.eof()) {
-        int a, b;
-        file >> a;
-        file >> b;
+unsigned int n = 0;
+unsigned int oriented;
+file >> n >> oriented;
 
-        G[a].push_back(b);
-        if(oriented == 0) {
-            G[b].push_back(a);
-        }
+G.resize(n);
+
+while (!file.eof()) {
+    int a, b;
+    file >> a;
+    file >> b;
+
+    G[a].push_back(b);
+    if(oriented == 0) {
+        G[b].push_back(a);
     }
+}
 
-    file.close();
+file.close();
+```
 
 Параметры:
 
@@ -183,28 +185,29 @@
 
 Участок кода:
 
-    ifstream file("graphFile");
+```cpp
+ifstream file("graphFile");
 
-    unsigned int test = 123;
-    unsigned int n = 0;
-    unsigned int oriented;
-    file >> n >> oriented;
+unsigned int test = 123;
+unsigned int n = 0;
+unsigned int oriented;
+file >> n >> oriented;
 
-    G.resize(n);
+G.resize(n);
 
-    while (!file.eof()) {
-        int a, b;
-        file >> a;
-        file >> b;
+while (!file.eof()) {
+    int a, b;
+    file >> a;
+    file >> b;
 
-        G[a].push_back(b);
-        if(oriented == 0) {
-            G[b].push_back(a);
-        }
+    G[a].push_back(b);
+    if(oriented == 0) {
+        G[b].push_back(a);
     }
+}
 
-    file.close();
-
+file.close();
+```
 Параметры запуска:
 
     "code_1" : "ifstream file ( "graphFile" ) ;"
@@ -293,3 +296,143 @@
         2950 : 123:1:2824:2847 : unsigned int test = 123 ; -> test
 
 Вывод: программа корректно возвращает результатом либо все маршруты исполнения исследуемого функционального объекта, либо сообщает о том что таких маршрутов не существует.
+
+
+### Тест №4
+
+Цель: проверить способность программы найти все участки взаимодействия двух функциональных объектов, связанных по управлению.
+
+Последовательность действий оператора:
+1.	В конфигурационном файле заполнить поля "main_object" и "secondary_object" в секции "functional_management_control" двумя объектами, полученными при помощи вызова программы с параметром sfo.
+2.	Запустить программу командой python main.py fmc
+
+Участок кода:
+
+```cpp  
+void testFunc() {
+	string filename;
+	string strToWrite("test");
+	filename = "data.txt";
+	
+	ofstream file(filename);
+
+	int someNumber = 0;
+	for (int i = 0; i++; i < 100) {
+		someNumber = i + 1;
+		file.write(strToWrite.c_str(), strToWrite.length());
+		file << strToWrite;
+		strToWrite += filename;
+	}
+
+	file.close();
+
+	return;
+}
+```
+
+Параметры:
+
+    "main_object"       : "string filename ;"
+    "secondary_object"  : "ofstream file ( filename ) ;"
+
+Результаты тестирования:
+    Start processing of functional management control...
+    Get one functional object...  done.
+    Get symbol of functional object...  done.
+    Get one functional object...  done.
+    Get symbol of functional object...  done.
+    There is  1  main objects in project
+            3145 : 158:1:3339:3354 : string filename ; -> filename
+    There is  1  secondary objects in project
+            3131 : 162:1:3411:3434 : ofstream file ( filename ) ; -> file
+    Starting getting trace
+    CODE_1 =  string filename ;
+    CODE_2 =  EXIT
+    Get all path...  done.
+    Get types of statements...  done.
+    Start parsing traces to functional management control...
+    done.
+    Start parsing traces to functional management control...
+    done.
+    ====================================================================================================
+    Trace 0
+
+    158:1 string filename ; -- CompoundStatement -->
+    159:1 string strToWrite ( "test" ) ; -- CompoundStatement -->
+    160:1 filename = "data.txt" -- CompoundStatement -->
+    162:1 ofstream file ( filename ) ; -- CompoundStatement -->
+    164:1 int someNumber = 0 ; -- CompoundStatement -->
+    165:6 int i = 0 ; -- ForStatement -->
+    165:17 i ++ -- ForStatement:False -->
+    172:1 file . close ( ) -- CompoundStatement -->
+    174:1 return ; -- CompoundStatement -->
+    EXIT
+    ====================================================================================================
+    Trace 1
+
+    158:1 string filename ; -- CompoundStatement -->
+    159:1 string strToWrite ( "test" ) ; -- CompoundStatement -->
+    160:1 filename = "data.txt" -- CompoundStatement -->
+    162:1 ofstream file ( filename ) ; -- CompoundStatement -->
+    164:1 int someNumber = 0 ; -- CompoundStatement -->
+    165:6 int i = 0 ; -- ForStatement -->
+    165:17 i ++ -- ForStatement:True -->
+    166:2 someNumber = i + 1 -- CompoundStatement -->
+    167:2 file . write ( strToWrite . c_str ( ) , strToWrite . length ( ) ) -- CompoundStatement -->
+    168:2 file << strToWrite -- CompoundStatement -->
+    169:2 strToWrite += filename -- CompoundStatement -->
+    165:22 i < 100 -- ForStatement -->
+    165:17 i ++ -- ForStatement:False -->
+    172:1 file . close ( ) -- CompoundStatement -->
+    174:1 return ; -- CompoundStatement -->
+    EXIT
+    ====================================================================================================
+    Examples of interaction between objects
+    For trace  0
+            162:1   ofstream file ( filename ) ;
+    For trace  1
+            162:1   ofstream file ( filename ) ;
+    time =  116.770251711 seconds
+
+Вывод: программа успешно детектировала места в коде, в которых прослеживается связь по управлению между исследуемым и второстепенным объектом.
+
+### Тест №5
+
+Цель: проверить способность программы найти все участки взаимодействия двух функциональных объектов, связанных по информации.
+
+Последовательность действий оператора:
+1.	В конфигурационном файле заполнить поля "main_object" и "secondary_object" в секции "functional_information_control" двумя объектами, полученными при помощи вызова программы с параметром sfo.
+2.	Запустить программу командой python main.py fmc
+
+Участок кода:
+
+```cpp  
+void testFunc() {
+	string filename;
+	string strToWrite("test");
+	filename = "data.txt";
+	
+	ofstream file(filename);
+
+	int someNumber = 0;
+	for (int i = 0; i++; i < 100) {
+		someNumber = i + 1;
+		file.write(strToWrite.c_str(), strToWrite.length());
+		file << strToWrite;
+		strToWrite += filename;
+	}
+
+	file.close();
+
+	return;
+}
+```
+
+Параметры:
+
+    "main_object"       : "ofstream file ( filename ) ;"
+    "secondary_object"  : "string strToWrite ( \\\"test\\\" ) ;"
+
+Результаты тестирования:
+
+Вывод:

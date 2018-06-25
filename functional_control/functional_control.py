@@ -135,13 +135,14 @@ def fc_main(config, param):
 	DATABASE_PATH = config["general"]["database_path"]
 	CQL_FOLDER = config["general"]["root_path"] + "\\functional_management_control\\"
 
-	main_object_code = config["functional_management_control"]["main_object"]
-	secondary_object_code = config["functional_management_control"]["secondary_object"]	
-
 	if param == 'fmc':
 		print 'Start processing of functional management control...'
+		main_object_code = config["functional_management_control"]["main_object"]
+		secondary_object_code = config["functional_management_control"]["secondary_object"]	
 	elif param == 'fic':
 		print 'Start processing of functional information control...'
+		main_object_code = config["functional_information_control"]["main_object"]
+		secondary_object_code = config["functional_information_control"]["secondary_object"]	
 	else:
 		print 'Wrong param, exiting...'
 		return
@@ -179,6 +180,8 @@ def fc_main(config, param):
 	k = 0
 	for res in results:
 		print 'For trace ', str(k)
+		if len(res[0]) == 0:
+			print '\t No'
 		for i in range(len(res[0])):
 			print '\t', res[0][i], ' ', res[1][i]
 		k += 1
