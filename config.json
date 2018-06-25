@@ -13,8 +13,8 @@
     },
 
     "functional_management_control" : {
-        "main_object"       : "unsigned int test = 123 ;",
-        "secondary_object"  : ""
+        "main_object"       : "string filename ;",
+        "secondary_object"  : "ofstream file ( filename ) ;"
     },
 
     "functional_information_control" : {

@@ -8,11 +8,14 @@ class functional_object:
     def get_id(self):
         return self.id
 
+    def set_symbol(self, symbol):
+        self.symbol = symbol
+
     def get_symbol(self):
         return self.symbol
 
-    def set_symbol(self, symbol):
-        self.symbol = symbol
+    def get_symbol_spaces(self):
+        return ' ' + self.symbol + ' '
 
     def get_code(self):
         return self.code

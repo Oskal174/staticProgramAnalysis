@@ -4,8 +4,7 @@ import time
 from code_trace.get_trace import get_trace_main
 from find_pattern.check_pattern import check_pattern_main
 from functional_objects.functional_objects import functional_objects_main
-from functional_information_control.functional_information_control import fic_main
-from functional_management_control.functional_management_control import fmc_main
+from functional_control.functional_control import fc_main
 
 
 def print_help():
@@ -46,9 +45,9 @@ if __name__ == '__main__':
             file = sys.argv[2]
         functional_objects_main(config, 'get_all', file)
     elif sys.argv[1] == 'functional_management_control' or sys.argv[1] == 'fmc':
-        fmc_main(config)
+        fc_main(config, 'fmc')
     elif sys.argv[1] == 'functional_information_control' or sys.argv[1] == 'fic':
-        fic_main(config)
+        fc_main(config, 'fic')
     else:
         print_help()
     
